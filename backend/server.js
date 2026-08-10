@@ -19,6 +19,7 @@ const pool = new Pool({
   port: Number(process.env.PGPORT || 5432),
   database: process.env.PGDATABASE,
   user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
   ssl: {
     rejectUnauthorized: false
   }
@@ -27,7 +28,7 @@ const pool = new Pool({
 // API
 app.get("/api/employees", async (req, res) => {
   try {
-    console.log("PGHOST:", process.env.PGHOST);
+       console.log("PGHOST:", process.env.PGHOST);
     console.log("PGPORT:", process.env.PGPORT);
     console.log("PGDATABASE:", process.env.PGDATABASE);
     console.log("PGUSER:", process.env.PGUSER);

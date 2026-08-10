@@ -11,3 +11,9 @@ env:
 
   - name: PGDATABASE
     value: "databricks_postgres"
+
+  - name: PGUSER
+    value: "node-app"
+  
+  - name: PGPASSWORD
+    value: "lakebase_password"
