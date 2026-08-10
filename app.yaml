@@ -16,4 +16,4 @@ env:
     value: "node-app"
   
   - name: PGPASSWORD
-    valueFrom: "lakebase_password"
+    value: "npg_wQ3ztpCf4Vme"
