@@ -1,3 +1,19 @@
 command:
   - "npm"
   - "start"
+
+env:
+  - name: PGHOST
+    value: "ep-empty-night-d8hylp30.database.us-east-2.cloud.databricks.com"
+
+  - name: PGPORT
+    value: "5432"
+
+  - name: PGDATABASE
+    value: "databricks_postgres"
+
+  - name: PGUSER
+    value: "node-app"
+  
+  - name: PGPASSWORD
+    valueFrom: "lakebase_password"
