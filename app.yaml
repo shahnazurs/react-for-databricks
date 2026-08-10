@@ -16,4 +16,4 @@ env:
     value: "node-app"
   
   - name: PGPASSWORD
-    value: "npg_wQ3ztpCf4Vme"
+    valueFrom: "PGPASSWORD"
