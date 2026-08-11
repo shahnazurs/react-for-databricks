@@ -1,9 +1,10 @@
 import "dotenv/config";
-
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import pg from "pg";
+
+import cors from 'cors'
 
 const { Pool } = pg;
 
@@ -11,6 +12,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(cors())
+app.use(express.json())
 
 const PORT = process.env.PORT || process.env.DATABRICKS_APP_PORT || 8000;
 
@@ -28,11 +31,7 @@ const pool = new Pool({
 // API
 app.get("/api/employees", async (req, res) => {
   try {
-       console.log("PGHOST:", process.env.PGHOST);
-    console.log("PGPORT:", process.env.PGPORT);
-    console.log("PGDATABASE:", process.env.PGDATABASE);
-    console.log("PGUSER:", process.env.PGUSER);
-    console.log("PGPASSWORD exists:", !!process.env.PGPASSWORD);
+
     const result = await pool.query(
       "SELECT * FROM public.employees LIMIT 100"
     );
@@ -46,6 +45,42 @@ app.get("/api/employees", async (req, res) => {
     });
   }
 });
+
+app.post("/api/employees", async (req, res) => {
+  try {
+    const { ename, email, sal } = req.body;
+    const result = await pool.query(
+      `INSERT INTO public.employees(ename,email,sal) values($1, $2, $3) RETURNING *`, [ename, email, sal]);
+
+    res.status(201).json(result.rows[0]);
+  }
+  catch (erro) {
+    console.error("Create employee failed:", error);
+
+    res.status(500).json({
+      error: "Failed to create employee"
+    });
+  }
+
+})
+
+app.delete("/api/employees/:empno", async (req, res) => {
+  console.log("Deleting.....")
+  console.log(req.params)
+  const result = await pool.query(
+    "DELETE FROM public.employees where empno = $1 RETURNING *", [req.params.empno]
+  );
+
+  if (result.rowCount == 0) {
+    return res.status(404).json({
+      error: "Employee not found"
+    })
+  }
+  res.json({
+    message: "Employee delete successfully",
+    employee: result.rows[0]
+  })
+})
 
 // React production build
 const frontendPath = path.join(
