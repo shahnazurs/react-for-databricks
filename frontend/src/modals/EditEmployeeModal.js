@@ -1,41 +1,39 @@
 
 import { useEffect, useRef, useState } from 'react';
 import '../css/modal.css'
-export default function CreateEmployeeModal(props) {
-    const { show, handleClose, handleCreate, newEmployee, setNewEmployee } = props;
+export default function EditEmployeeModal(props) {
+    const { show, handleClose, handleEdit, selectedEmployee, setSelectedEmployee } = props;
     const showHideClassName = show ? "modal display-block" : "modal display-none";
 
     const nameInputRef = useRef(null);
     const emailInputRef = useRef(null);
+
     const salInputRef = useRef(null);
+
 
     const [errors, setErrors] = useState({})
 
-
-    useEffect(() => {
-        nameInputRef.current.focus();
-    }, [])
+    const newErrors = {}
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Form submitted")
-        const newErrors = {};
 
-        if (!newEmployee.ename?.trim()) {
+        if (!selectedEmployee.ename?.trim()) {
             newErrors.ename = "Employee Name is required";
         }
-
-        if (!newEmployee.email?.trim()) {
+        if (!selectedEmployee.email?.trim()) {
             newErrors.email = "Email is required";
         }
-        if (newEmployee.sal === "") {
+        if (selectedEmployee.sal === "") {
             newErrors.sal = "Salary is required";
         }
-        if (newEmployee.sal > 999999) {
+
+        if (selectedEmployee.sal > 999999) {
             newErrors.sal = "Salary cannot exceed 999,999";
         }
 
         setErrors(newErrors);
+
 
         if (newErrors.ename) {
             nameInputRef.current.focus();
@@ -50,30 +48,39 @@ export default function CreateEmployeeModal(props) {
             return;
         }
 
-        //if (Object.keys(newErrors).length > 0) { return; }
-
-        handleCreate();
+        handleEdit();
     }
+
+    useEffect(() => {
+        nameInputRef.current.focus();
+    }, [])
     return (
         <div className={showHideClassName}>
             <section className="modal-main">
-                <h2 className='headingStyle' style={{ "userSelect": "none" }}>New Employee</h2>
+                <h2 className='headingStyle' style={{ "userSelect": "none" }}>Edit Employee</h2>
                 <br />
                 <form onSubmit={handleSubmit}>
                     <div className='form-group'>
                         <div className="mb-3 mt-3 row">
                             <div className="col-md-6">
+                                <label htmlFor="empno" className="form-label" >Employee Number:</label>
+                            </div>
+                            <div className="col-md-6">
+                                <input type="number" className="form-control" name="empno" id="empno" placeholder="Enter Name" value={selectedEmployee.empno} disabled />
+                            </div>
+                        </div>
+                        <div className="mb-3 mt-3 row">
+                            <div className="col-md-6">
                                 <label htmlFor="name" className="form-label">Employee Name:</label>
                             </div>
                             <div className="col-md-6">
-                                <input ref={nameInputRef} type="text" className="form-control" name="name" placeholder="Enter Name" value={newEmployee.ename}
+                                <input ref={nameInputRef} type="text" className="form-control" name="name" placeholder="Enter Name" value={selectedEmployee.ename}
                                     onChange={(e) => {
-                                        setNewEmployee({ ...newEmployee, ename: e.target.value });
+                                        setSelectedEmployee({ ...selectedEmployee, ename: e.target.value });
                                         if (errors.ename) {
                                             setErrors({ ...errors, ename: "" })
                                         }
-                                    }
-                                    }
+                                    }}
                                     autoComplete='off' maxLength={25} />
                                 {errors.ename && (<div className='employee-error'> {errors.ename} </div>)}
                             </div>
@@ -83,13 +90,14 @@ export default function CreateEmployeeModal(props) {
                                 <label htmlFor="email" className="form-label">Email:</label>
                             </div>
                             <div className="col-md-6">
-                                <input type="email" ref={emailInputRef} className="form-control" name="email" placeholder="Enter Email" value={newEmployee.email}
+                                <input type="email" ref={emailInputRef} className="form-control" name="email" placeholder="Enter Email" value={selectedEmployee.email}
                                     onChange={(e) => {
-                                        setNewEmployee({ ...newEmployee, email: e.target.value });
+                                        setSelectedEmployee({ ...selectedEmployee, email: e.target.value });
                                         if (errors.email) {
                                             setErrors({ ...errors, email: "" })
                                         }
-                                    }} autoComplete='off' maxLength={50} />
+                                    }}
+                                    autoComplete='off' maxLength={50} />
                                 {errors.email && (<div className='employee-error'> {errors.email} </div>)}
                             </div>
                         </div>
@@ -98,10 +106,10 @@ export default function CreateEmployeeModal(props) {
                                 <label htmlFor="sal" className="form-label">Salary:</label>
                             </div>
                             <div className="col-md-6">
-                                <input type="number" ref={salInputRef} className="form-control" name="sal" placeholder="Enter Salary" value={newEmployee.sal} 
+                                <input type="number" ref={salInputRef} className="form-control" name="sal" placeholder="Enter Salary" value={selectedEmployee.sal} 
                                 onChange={(e) => {
-                                    setNewEmployee({ ...newEmployee, sal: e.target.value });
-                                     if (errors.sal) {
+                                    setSelectedEmployee({ ...selectedEmployee, sal: e.target.value })
+                                    if (errors.sal) {
                                             setErrors({ ...errors, sal: "" })
                                         }
                                 }}
@@ -109,14 +117,13 @@ export default function CreateEmployeeModal(props) {
                                         if (["e", "E", "-", "+"].includes(e.key)) {
                                             e.preventDefault()
                                         }
-
-                                    }}/>
+                                    }} />
                                 {errors.sal && (<div className='employee-error'> {errors.sal} </div>)}
                             </div>
                         </div>
                     </div>
-                    <button className="btn btn-danger" style={{ marginRight: "10px" }} type="submit">Save</button>
-                    <button className="btn btn-secondary" type="button" onClick={handleClose}>Close</button>
+                    <button className="btn btn-danger" type="submit" style={{ marginRight: "10px" }}>Save</button>
+                    <button type="button" className="btn btn-secondary" onClick={handleClose}>Close</button>
                 </form>
                 <br />
 

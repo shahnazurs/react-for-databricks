@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import '../css/employees.css'
 import DeleteEmployeeModal from "../modals/DeleteEmployeeModal";
 import CreateEmployeeModal from "../modals/CreateEmployeeModal";
+import EditEmployeeModal from "../modals/EditEmployeeModal";
 
 const Employee = () => {
 
@@ -11,9 +12,11 @@ const Employee = () => {
 
     const [showCreateModal, setShowCreateModal] = useState(false)
 
+    const [showEditModal, setShowEditModal] = useState(false)
+
     const [newEmployee, setNewEmployee] = useState(null)
 
-    const [empno, setEmpno] = useState(null)
+    const [selectedEmployee, setSelectedEmployee] = useState(null)
 
     const API_URL = process.env.NODE_ENV === "development" ? "http://localhost:5200" : "";
 
@@ -29,6 +32,7 @@ const Employee = () => {
     const handleClose = () => {
         showDeleteModal && setShowDeleteModal(false)
         showCreateModal && setShowCreateModal(false)
+        showEditModal && setShowEditModal(false)
     }
 
     const handleCreate = async () => {
@@ -53,12 +57,32 @@ const Employee = () => {
         }
     }
 
+    const handleEdit = async () => {
+        setShowEditModal(false);
+        try {
+            const response = await fetch(`${API_URL}/api/employees/${selectedEmployee.empno}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(selectedEmployee)
+            })
+            if (!response.ok) {
+                throw new Error("Failed to update Employee")
+            }
+            fetchEmployees()
+        }
+        catch (error) {
+
+        }
+
+    }
+
     const handleDelete = async () => {
-        console.log("Delete Employee-----" + empno)
         setShowDeleteModal(false)
 
         try {
-            const response = await fetch(`${API_URL}/api/employees/${empno}`, {
+            const response = await fetch(`${API_URL}/api/employees/${selectedEmployee.empno}`, {
                 method: "DELETE"
             });
             if (!response.ok) {
@@ -81,8 +105,13 @@ const Employee = () => {
         setShowCreateModal(true)
     }
 
-    const handleDeleteModal = (empno) => {
-        setEmpno(empno);
+    const handleEditModal = (employee) => {
+        setSelectedEmployee(employee);
+        setShowEditModal(true)
+    }
+
+    const handleDeleteModal = (employee) => {
+        setSelectedEmployee(employee);
         setShowDeleteModal(true)
     }
 
@@ -98,44 +127,47 @@ const Employee = () => {
 
                 {
 
-                    showDeleteModal && <DeleteEmployeeModal show={showDeleteModal} handleClose={handleClose} handleDelet={handleDelete} />
+                    showDeleteModal && <DeleteEmployeeModal show={showDeleteModal} handleClose={handleClose} handleDelete={handleDelete} selectedEmployee={selectedEmployee} />
                 }
                 {
 
-                    showCreateModal && <CreateEmployeeModal show={showCreateModal} handleClose={handleClose} handleCreate={handleCreate} newEmployee={newEmployee}  setNewEmployee={setNewEmployee} />
+                    showCreateModal && <CreateEmployeeModal show={showCreateModal} handleClose={handleClose} handleCreate={handleCreate} newEmployee={newEmployee} setNewEmployee={setNewEmployee} />
 
+                }
+                {
+                    showEditModal && <EditEmployeeModal show={showEditModal} selectedEmployee={selectedEmployee} setSelectedEmployee={setSelectedEmployee} handleEdit={handleEdit} handleClose={handleClose} />
                 }
             </>
 
             {
 
                 employees.length > 0 ?
-
+                    <div className="table-wrapper">
                     <table className="table">
                         <thead>
                             <tr>
-                                <th>Employee Id</th><th>Name</th><th>Email</th><th>Salary</th><th>&nbsp;</th>
+                                <th>Employee Id</th><th>Name</th><th>Email</th><th>Salary</th><th colSpan={2}>&nbsp;</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 employees.map(employee => (
                                     <tr key={employee.empno}>
-                                        <td>{employee.empno}</td>
-                                        <td>{employee.ename}</td>
-                                        <td>{employee.email}</td>
-                                        <td>{employee.sal}</td>
+                                        <td data-label="Employee Id">{employee.empno}</td>
+                                        <td data-label="Name">{employee.ename}</td>
+                                        <td data-label="Email">{employee.email}</td>
+                                        <td data-label="Salary">{employee.sal}</td>
                                         <td>
-                                            <button type="button" className="btn btn-primary">Edit</button>
-                                            &nbsp;
-                                            &nbsp;
-                                            <button type="button" onClick={() => handleDeleteModal(employee.empno)} className="btn btn-danger">Delete</button>
+                                            <button type="button" className="btn btn-primary" onClick={() => handleEditModal(employee)}>Edit</button></td>
+                                      
+                                            <td><button type="button" onClick={() => handleDeleteModal(employee)} className="btn btn-danger">Delete</button>
                                         </td>
                                     </tr>
                                 ))
                             }
                         </tbody>
                     </table>
+                    </div>
 
                     :
                     <p>No employees fetched</p>

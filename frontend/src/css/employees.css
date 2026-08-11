@@ -1,13 +1,70 @@
-body{
+body {
     margin: 5px;
 }
 
-.heading{
+.heading {
     padding: 20px 10px;
     background-color: antiquewhite;
+
+}
+
+.table-wrapper{
+    clear: both;
 }
 
 table {
-    margin-top: 20px;
+    margin-top: 30px;
+}
+.employee-error{
+    text-align: left;
+    margin-left: 3px;
+    color: red;
 }
 
+@media (max-width: 600px) {
+    table,
+    tbody,
+    tr,
+    td {
+        display: block;
+        width: 100%;
+    }
+    .table-wrapper{
+        clear: both;
+        margin-top:50px;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tr {
+        margin-bottom: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+    }
+
+    td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-sizing: border-box;
+        border: none;
+        border-bottom: 1px solid #eee;
+        padding: 10px 12px;
+    }
+
+    td:last-child {
+        border-bottom: none;
+    }
+
+    /* Show column name before each value */
+    td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #555;
+        margin-right: 15px;
+    }
+}

@@ -33,7 +33,7 @@ app.get("/api/employees", async (req, res) => {
   try {
 
     const result = await pool.query(
-      "SELECT * FROM public.employees LIMIT 100"
+      "SELECT * FROM public.employees order by empno"
     );
 
     res.json(result.rows);
@@ -62,6 +62,26 @@ app.post("/api/employees", async (req, res) => {
     });
   }
 
+})
+
+app.put("/api/employees/:empno", async (req,res)=>{
+  console.log(req.body)
+  console.log(req.params)
+
+  const {ename, email,sal} = req.body
+
+  const result= await pool.query(
+    "UPDATE public.employees set ename=$1, email=$2, sal=$3 where empno=$4",[ename,email,sal,req.params.empno]
+  )
+  if(result.rowCount == 0){
+    return res.status(404).json({
+      error: "Unable to update"
+    })
+  }
+  console.log(result);
+  res.json({
+    message: "Successfully updated"
+  })
 })
 
 app.delete("/api/employees/:empno", async (req, res) => {
