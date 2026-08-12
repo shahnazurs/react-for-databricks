@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import '../css/modal.css'
 export default function EditEmployeeModal(props) {
-    const { show, handleClose, handleEdit, selectedEmployee, setSelectedEmployee } = props;
+    const { show, handleClose, handleEdit, selectedEmployee, setSelectedEmployee, departments } = props;
     const showHideClassName = show ? "modal display-block" : "modal display-none";
 
     const nameInputRef = useRef(null);
@@ -106,13 +106,13 @@ export default function EditEmployeeModal(props) {
                                 <label htmlFor="sal" className="form-label">Salary:</label>
                             </div>
                             <div className="col-md-6">
-                                <input type="number" ref={salInputRef} className="form-control" name="sal" placeholder="Enter Salary" value={selectedEmployee.sal} 
-                                onChange={(e) => {
-                                    setSelectedEmployee({ ...selectedEmployee, sal: e.target.value })
-                                    if (errors.sal) {
+                                <input type="number" ref={salInputRef} className="form-control" name="sal" placeholder="Enter Salary" value={selectedEmployee.sal}
+                                    onChange={(e) => {
+                                        setSelectedEmployee({ ...selectedEmployee, sal: e.target.value })
+                                        if (errors.sal) {
                                             setErrors({ ...errors, sal: "" })
                                         }
-                                }}
+                                    }}
                                     onKeyDown={(e) => {
                                         if (["e", "E", "-", "+"].includes(e.key)) {
                                             e.preventDefault()
@@ -121,6 +121,22 @@ export default function EditEmployeeModal(props) {
                                 {errors.sal && (<div className='employee-error'> {errors.sal} </div>)}
                             </div>
                         </div>
+                        <div className="mb-3 mt-3 row">
+                            <div className="col-md-6">
+                                <label htmlFor="sal" className="form-label">Department Name:</label>
+                            </div>
+                            <div className="col-md-6">
+                                    <select className="form-select" value={selectedEmployee.deptno} onChange={(e)=>setSelectedEmployee({...selectedEmployee, deptno : e.target.value})}>
+                                        {
+                                            departments.map((department)=>{
+                                                return <option key={department.deptno} value={department.deptno}>{department.dname}</option>
+                                            })
+                                        }
+                                    </select>
+                            </div>
+                        </div>
+
+
                     </div>
                     <button className="btn btn-danger" type="submit" style={{ marginRight: "10px" }}>Save</button>
                     <button type="button" className="btn btn-secondary" onClick={handleClose}>Close</button>

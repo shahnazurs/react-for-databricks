@@ -12,8 +12,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors())
-app.use(express.json())
+app.use(cors()) // Cross Origin Resource Sharing
+app.use(express.json()) // Parse JSON body and keep it under request body
 
 const PORT = process.env.PORT || process.env.DATABRICKS_APP_PORT || 8000;
 
@@ -33,7 +33,29 @@ app.get("/api/employees", async (req, res) => {
   try {
 
     const result = await pool.query(
-      "SELECT * FROM public.employees order by empno"
+      `SELECT empno,ename,email,sal,d.deptno, d.dname as dname FROM 
+          public.employees as e
+          join 
+          public.department as d
+          on (e.deptno=d.deptno)
+        order by empno`
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Lakebase query failed:", error);
+
+    res.status(500).json({
+      error: "Database query failed"
+    });
+  }
+});
+
+app.get("/api/departments", async (req, res) => {
+  try {
+
+    const result = await pool.query(
+      `SELECT * FROM public.department order by dname`  
     );
 
     res.json(result.rows);
@@ -48,9 +70,9 @@ app.get("/api/employees", async (req, res) => {
 
 app.post("/api/employees", async (req, res) => {
   try {
-    const { ename, email, sal } = req.body;
+    const { ename, email, sal, deptno } = req.body;
     const result = await pool.query(
-      `INSERT INTO public.employees(ename,email,sal) values($1, $2, $3) RETURNING *`, [ename, email, sal]);
+      `INSERT INTO public.employees(ename,email,sal,deptno) values($1, $2, $3, $4) RETURNING *`, [ename, email, sal, deptno]);
 
     res.status(201).json(result.rows[0]);
   }
@@ -68,10 +90,10 @@ app.put("/api/employees/:empno", async (req,res)=>{
   console.log(req.body)
   console.log(req.params)
 
-  const {ename, email,sal} = req.body
+  const {ename, email,sal, deptno} = req.body
 
   const result= await pool.query(
-    "UPDATE public.employees set ename=$1, email=$2, sal=$3 where empno=$4",[ename,email,sal,req.params.empno]
+    "UPDATE public.employees set ename=$1, email=$2, sal=$3, deptno=$4 where empno=$5",[ename,email,sal,deptno,req.params.empno]
   )
   if(result.rowCount == 0){
     return res.status(404).json({
@@ -111,11 +133,16 @@ const frontendPath = path.join(
 app.use(express.static(frontendPath));
 
 // React client-side routing
-app.get("/*splat", (req, res) => {
+app.get("/", (req, res) => {
+  console.log("Root......")
   res.sendFile(
     path.join(frontendPath, "index.html")
   );
 });
+
+app.use((req,res)=>{
+  res.status(404).send("File not found....")
+})
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Application running on port ${PORT}`);
